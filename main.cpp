@@ -137,6 +137,13 @@ void mouse_handler(int event, int x, int y, int flags, void* param)
 		break;
 	case cv::EVENT_MOUSEMOVE:
 		if (current_idx != -1) {
+			if (current_idx % 3 == 0) {
+				int n_pts = bezigon.size();
+				bezigon[(current_idx + 1) % n_pts].x += x - bezigon[current_idx].x;
+				bezigon[(current_idx + 1) % n_pts].y += y - bezigon[current_idx].y;
+				bezigon[(current_idx - 1 + n_pts) % n_pts].x += x - bezigon[current_idx].x;
+				bezigon[(current_idx - 1 + n_pts) % n_pts].y += y - bezigon[current_idx].y;
+			}
 			bezigon[current_idx].x = x;
 			bezigon[current_idx].y = y;
 		}
