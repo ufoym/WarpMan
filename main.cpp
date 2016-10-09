@@ -82,13 +82,6 @@ int find_nearest(const std::vector<cv::Point2f> & bezigon, int x, int y, float m
 	return min_idx;
 }
 
-void redraw(const cv::Mat & src_img, const std::vector<cv::Point2f> & bezigon) {
-	cv::Mat img = src_img.clone();
-	draw_bezigon(img, bezigon, cv::Scalar(255, 0, 255), 2);
-	cv::pyrDown(img, img);
-	cv::imshow("source", img);
-}
-
 
 cv::Mat warp(
 	const cv::Mat & src_img,
@@ -125,15 +118,28 @@ cv::Mat warp(
 cv::Mat src_img = cv::imread("test.jpg");
 std::vector<cv::Point2f> bezigon = init_bezigon();
 int current_idx = -1;
+int nearest_idx = -1;
+
+
+void redraw(const cv::Mat & src_img, const std::vector<cv::Point2f> & bezigon) {
+	cv::Mat img = src_img.clone();
+	draw_bezigon(img, bezigon, cv::Scalar(255, 0, 255), 2);
+	if (current_idx != -1 || nearest_idx != -1)
+		cv::circle(img, bezigon[current_idx == -1 ? nearest_idx : current_idx], 
+			10, cv::Scalar(0, 255, 255), -1, cv::LINE_AA);
+	cv::pyrDown(img, img);
+	cv::imshow("source", img);
+}
 
 
 void mouse_handler(int event, int x, int y, int flags, void* param)
 {
 	x *= 2;
 	y *= 2;
+	nearest_idx = find_nearest(bezigon, x, y);
 	switch (event) {
 	case cv::EVENT_LBUTTONDOWN:
-		current_idx = find_nearest(bezigon, x, y);
+		current_idx = nearest_idx;
 		break;
 	case cv::EVENT_MOUSEMOVE:
 		if (current_idx != -1) {
