@@ -41,7 +41,6 @@ void draw_bezigon(
 	const std::vector<cv::Point2f> bezigon,
 	const cv::Scalar curve_color,
 	const int thickness = 1,
-	const float ctrl_alpha = 0.7f,
 	const cv::Scalar ctrl_color = cv::Scalar(0, 255, 255),
 	const int n_samples = 100)
 {
@@ -55,16 +54,12 @@ void draw_bezigon(
 			prev_pt = pt;
 		}
 	}
-	if (ctrl_alpha > 0) {
-		cv::Mat img_copy = img.clone();
-		for (int i = 0; i < n_pts; i += 3) {
-			cv::line(img, bezigon[i + 0], bezigon[i + 1], ctrl_color, 1, cv::LINE_AA);
-			cv::line(img, bezigon[i + 2], bezigon[(i + 3) % n_pts], ctrl_color, 1, cv::LINE_AA);
-		}
-		for each (auto pt in bezigon)
-			cv::circle(img, pt, 3, ctrl_color, -1, cv::LINE_AA);
-		img = img * ctrl_alpha + img_copy * (1 - ctrl_alpha);
+	for (int i = 0; i < n_pts; i += 3) {
+		cv::line(img, bezigon[i + 0], bezigon[i + 1], ctrl_color, 1, cv::LINE_AA);
+		cv::line(img, bezigon[i + 2], bezigon[(i + 3) % n_pts], ctrl_color, 1, cv::LINE_AA);
 	}
+	for each (auto pt in bezigon)
+		cv::circle(img, pt, 3, ctrl_color, -1, cv::LINE_AA);
 }
 
 int find_nearest(const std::vector<cv::Point2f> & bezigon, int x, int y, float min_dist = 5.0f)
@@ -127,15 +122,12 @@ void redraw(const cv::Mat & src_img, const std::vector<cv::Point2f> & bezigon) {
 	if (current_idx != -1 || nearest_idx != -1)
 		cv::circle(img, bezigon[current_idx == -1 ? nearest_idx : current_idx], 
 			10, cv::Scalar(0, 255, 255), -1, cv::LINE_AA);
-	cv::pyrDown(img, img);
 	cv::imshow("source", img);
 }
 
 
 void mouse_handler(int event, int x, int y, int flags, void* param)
 {
-	x *= 2;
-	y *= 2;
 	nearest_idx = find_nearest(bezigon, x, y);
 	switch (event) {
 	case cv::EVENT_LBUTTONDOWN:
@@ -166,7 +158,6 @@ void mouse_handler(int event, int x, int y, int flags, void* param)
 	case cv::EVENT_LBUTTONUP:
 		current_idx = -1;
 		cv::Mat dst_img = warp(src_img, bezigon);
-		cv::pyrDown(dst_img, dst_img);
 		cv::imshow("result", dst_img);
 		break;
 	}
