@@ -148,6 +148,15 @@ void mouse_handler(int event, int x, int y, int flags, void* param)
 			bezigon[current_idx].y = y;
 		}
 		break;
+	case cv::EVENT_RBUTTONUP:
+		std::time_t rawtime;
+		std::tm* timeinfo;
+		char buffer[80];
+		std::time(&rawtime);
+		timeinfo = std::localtime(&rawtime);
+		std::strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S.jpg", timeinfo);
+		cv::imwrite(buffer, warp(src_img, bezigon));
+		break;
 	case cv::EVENT_LBUTTONUP:
 		current_idx = -1;
 		cv::Mat dst_img = warp(src_img, bezigon);
